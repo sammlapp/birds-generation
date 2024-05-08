@@ -11,6 +11,43 @@ The dataset used in this paper is the Xeno-Canto dataset from Kaggle. The datase
 
 ## Model Checkpoint
 MOdel checkpoints can be found in the [OSF Link](https://doi.org/10.17605/OSF.IO/YQDJ9) folder.
+
+## API with sample_generator.SampleGenerator class
+
+load model using a local checkpoint file
+```{python}
+m = SampleGenerator(model_path)
+```
+
+preprocess a .wav, .npy, or .png file into torch.tensor
+```{python}
+sample = m.load_sample(path_to_wav) # 
+```
+
+encoding and decoding
+```{python}
+quant_top, quant_bottom, diff, id_top, id_bottom = model.encode(sample)
+reconstructed_sample = model.decode(quant_top,quant_bottom)'
+
+# encode and decode in one step:
+reconstructed_sample = encode_decode(sample)
+```
+
+convert generated sample (np.array formatted spectrogram) back to audio signal using Griffin-Lim algorithm to estimate phase
+```{python}
+signal, sr = model.to_audio_signal(reconstructed_sample)
+```
+Feature-space augmentation: generate novel samples by perturbing or interpolating feature vectors
+```{python}
+# feature-space noise addition
+noise_sample = m.add_feature_space_noise(sample,strength=40)
+
+# feature-space interpolation
+s1 = m.load_sample(path_to_wav1)
+s2 = m.load_sample(path_to_wav2)
+interpolated_sample = m.feature_space_interpolation(s1,s2,ratio=.5)
+```
+
 ## Requirements
 The code is tested on Python 3.7.7 and PyTorch 1.13.1. The required packages can be installed using the following command:
 ```
